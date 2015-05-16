@@ -1,7 +1,7 @@
 {
-  "name": "dags",
+  "name": "fetch-optimizer",
   "version": "0.1.0",
-  "description": "DAGs algorithms",
+  "description": "Optimizes dependent data fetchers",
   "main": "index.js",
   "scripts": {
     "build": "node_modules/.bin/babel src -d lib --stage=0 --loose -w",
@@ -9,24 +9,26 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gcanti/dags.git"
+    "url": "https://github.com/gcanti/fetch-optimizer.git"
   },
   "author": "Giulio Canti <giulio.canti@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/gcanti/dags/issues"
+    "url": "https://github.com/gcanti/fetch-optimizer/issues"
   },
-  "homepage": "https://github.com/gcanti/dags",
+  "homepage": "https://github.com/gcanti/fetch-optimizer",
   "devDependencies": {
     "babel": "^5.4.3"
   },
   "tags": [
-    "dags",
-    "algorithm"
+    "fetch",
+    "promise",
+    "optimizer"
   ],
   "keywords": [
-    "dags",
-    "algorithm"
+    "fetch",
+    "promise",
+    "optimizer"
   ],
   "dependencies": {
     "debug": "^2.2.0"

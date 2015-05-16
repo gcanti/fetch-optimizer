@@ -1,7 +1,8 @@
 ```js
+// queries.js
+
 import { Poset, optimize } from 'fetch-optimizer';
 
-// queries.js
 const queries = {
   q1: () => new Promise(resolve => setTimeout(resolve('q1'), 200)),
   q2: () => new Promise(resolve => setTimeout(resolve('q2'), 50)),
