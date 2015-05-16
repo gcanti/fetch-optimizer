@@ -10,11 +10,13 @@ const queries = {
 };
 
 const dependencies = new Poset()
-  .addEdge('a', 'b')
-  .addEdge('a', 'c');
+  .addEdge('q1', 'q2')
+  .addEdge('q1', 'q3');
 
 optimize(dependencies, queries).then(res => console.log('end'));
 ```
+
+Run
 
 ```sh
 DEBUG=optimize node queries.js
