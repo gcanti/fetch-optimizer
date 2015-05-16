@@ -1,6 +1,6 @@
 import debug from 'debug';
 
-const log = debug('optimize');
+const log = debug('fetch-optimizer');
 
 export function optimize(poset, nodes) {
   const chain = poset.getSubPoset(nodes).toChain();
@@ -64,7 +64,7 @@ export class Poset {
     return !isEmpty(this.getEdges(node));
   }
 
-  getRoots() {
+  getMaximalElements() {
     const ret = {};
     for (let node in this.nodes) {
       if (!this.hasEdges(node)) {
@@ -78,7 +78,7 @@ export class Poset {
     let poset = this;
     const ret = [];
     while (!poset.isEmpty()) {
-      let roots = poset.getRoots();
+      let roots = poset.getMaximalElements();
       ret.push(roots);
       let nodes = {};
       for (let node in poset.nodes) {

@@ -40,10 +40,10 @@ describe('Poset', function () {
     assert.strictEqual(poset.hasEdges('b'), false);
   });
 
-  it('getRoots', function () {
+  it('getMaximalElements', function () {
     var poset = new Poset()
       .addEdge('a', 'b');
-    var roots = poset.getRoots();
+    var roots = poset.getMaximalElements();
     assert.deepEqual(roots, {b: 1});
   });
 

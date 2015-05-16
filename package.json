@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node_modules/.bin/babel src -d lib --stage=0 --loose -w",
-    "test": "DEBUG=optimize mocha"
+    "test": "DEBUG=fetch-optimizer mocha"
   },
   "repository": {
     "type": "git",
