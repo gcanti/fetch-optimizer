@@ -7,30 +7,26 @@ var optimize = require('../.').optimize;
 describe('Poset', function () {
 
   it('constructor', function () {
-    var poset = new Poset();
-    assert.deepEqual(poset.nodes, {});
+    assert.deepEqual(new Poset().nodes, {});
   });
 
   it('isEmpty', function () {
-    var poset = new Poset();
-    assert.strictEqual(poset.isEmpty(), true);
-    poset = new Poset().addNode('a');
-    assert.strictEqual(poset.isEmpty(), false);
+    assert.strictEqual(new Poset().isEmpty(), true);
+    assert.strictEqual(new Poset().addNode('a').isEmpty(), false);
   });
 
   it('addNode', function () {
     var poset = new Poset()
-      .addNode('a');
-    assert.deepEqual(poset.nodes, {a: {}});
-    // chaining
-    poset.addNode('b').addNode('c');
-    assert.deepEqual(poset.nodes, {a: {}, b: {}, c: {}});
+      .addNode('a')
+      .addNode('b');
+    assert.deepEqual(poset.nodes, {a: {}, b: {}});
   });
 
   it('addEdge', function () {
-    var poset = new Poset();
-    poset.addEdge('a', 'b');
-    assert.deepEqual(poset.nodes, {a: {b: 1}, b: {}});
+    var poset = new Poset()
+      .addEdge('a', 'b')
+      .addEdge('b', 'c');
+    assert.deepEqual(poset.nodes, {a: {b: 1}, b: {c: 1}, c: {}});
   });
 
   it('hasEdges', function () {
@@ -42,9 +38,10 @@ describe('Poset', function () {
 
   it('getMaximalElements', function () {
     var poset = new Poset()
-      .addEdge('a', 'b');
+      .addEdge('a', 'b')
+      .addEdge('a', 'c');
     var roots = poset.getMaximalElements();
-    assert.deepEqual(roots, {b: 1});
+    assert.deepEqual(roots, {b: 1, c: 1});
   });
 
   it('toChain', function () {
@@ -67,58 +64,41 @@ describe('Poset', function () {
     assert.deepEqual(chain, [{a: 1}, {b: 1}, {c: 1, d: 1, e: 1}, {f: 1, g: 1}, {h: 1}]);
   });
 
-  it('getSubPoset', function () {
+  describe('getUpsetPoset', function () {
 
-    var poset = new Poset();
-    var subPoset = poset.getSubPoset({a: 1, c: 1});
-    assert.deepEqual(subPoset.nodes, {});
+    it('should throw if unknown nodes are used', function () {
+      var poset = new Poset();
+      assert.throws(function () {
+        poset.getUpsetPoset({a: 1, c: 1});
+      });
+    });
 
-    var poset = new Poset()
-      .addEdge('a', 'b')
-      .addEdge('b', 'c');
-    var subPoset = poset.getSubPoset({a: 1, c: 1});
-    assert.deepEqual(subPoset.nodes, {a: {c: 1}, c: {}});
+    it('should return the whole poset if a bottom element is chosen', function () {
+      var poset = new Poset()
+        .addEdge('a', 'b')
+        .addEdge('b', 'c');
+      var upsetPoset = poset.getUpsetPoset({a: 1});
+      assert.deepEqual(upsetPoset.nodes, poset.nodes);
 
-    poset = new Poset()
-      .addEdge('a', 'b')
-      .addEdge('b', 'c')
-      .addEdge('b', 'd');
-    subPoset = poset.getSubPoset({a: 1, c: 1, d: 1});
-    assert.deepEqual(subPoset.nodes, {a: {c: 1, d: 1}, c: {}, d: {}});
+    });
 
-    poset = new Poset()
-      .addEdge('h', 'f')
-      .addEdge('h', 'g')
-      .addEdge('f', 'c')
-      .addEdge('g', 'd')
-      .addEdge('c', 'b')
-      .addEdge('d', 'b')
-      .addEdge('e', 'b')
-      .addEdge('b', 'a');
-    subPoset = poset.getSubPoset({b: 1, c: 1, e: 1, f: 1, g: 1});
-    assert.deepEqual(subPoset.nodes, {f: {c: 1}, g: {b: 1}, c: {b: 1}, e: {b: 1}, b: {}});
-  });
+    it('should return the union of upsets', function () {
+      var poset = new Poset()
+        .addEdge('a', 'c')
+        .addEdge('b', 'c')
+        .addEdge('c', 'd');
+      var upsetPoset = poset.getUpsetPoset({a: 1});
+      assert.deepEqual(upsetPoset.nodes, {a: {c: 1}, c: {d: 1}, d: {}});
 
-  it('should return the chain of a sub Poset', function () {
-    var poset = new Poset()
-      .addEdge('h', 'f')
-      .addEdge('h', 'g')
-      .addEdge('f', 'c')
-      .addEdge('g', 'd')
-      .addEdge('c', 'b')
-      .addEdge('d', 'b')
-      .addEdge('e', 'b')
-      .addEdge('b', 'a');
-    var subPoset = poset.getSubPoset({b: 1, c: 1, e: 1, f: 1, g: 1});
-    var chain = subPoset.toChain();
-    assert.deepEqual(chain, [{b: 1}, {c: 1, e: 1, g: 1}, {f: 1}]);
+    });
+
   });
 
 });
 
 describe('optimize', function () {
 
-  function buildThen(value, delay, result) {
+  function getFetcher(value, delay, result) {
     return function (res) {
       return new Promise(function (resolve) {
         setTimeout(function () {
@@ -129,15 +109,11 @@ describe('optimize', function () {
     };
   }
 
-  it('should return an resolved promise', function (done) {
+  it('should return a resolved promise', function (done) {
     var result = [];
-
-    var queries = {};
-
-    var dependencies = new Poset()
-
-    var promise = optimize(dependencies, queries);
-
+    var fetchers = {};
+    var dependencies = new Poset();
+    var promise = optimize(dependencies, fetchers);
     promise.then(function (res) {
       assert.deepEqual(result, []);
       assert.deepEqual(res, null);
@@ -147,22 +123,18 @@ describe('optimize', function () {
 
   it('should return an optimized promise', function (done) {
     var result = [];
-
-    var queries = {
-      q1: buildThen('q1', 200, result),
-      q2: buildThen('q2', 50, result),
-      q3: buildThen('q3', 150, result)
+    var fetchers = {
+      f1: getFetcher('f1', 200, result),
+      f2: getFetcher('f2', 50, result),
+      f3: getFetcher('f3', 150, result)
     };
-
     var dependencies = new Poset()
-      .addEdge('q1', 'q2')
-      .addEdge('q1', 'q3');
-
-    var promise = optimize(dependencies, queries);
-
+      .addEdge('f1', 'f2')
+      .addEdge('f1', 'f3');
+    var promise = optimize(dependencies, fetchers);
     promise.then(function (res) {
-      assert.deepEqual(result, ['q2', 'q3', 'q1']);
-      assert.deepEqual(res, ['q1']);
+      assert.deepEqual(result, ['f2', 'f3', 'f1']);
+      assert.deepEqual(res, ['f1']);
       done();
     });
   });

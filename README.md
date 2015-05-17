@@ -1,33 +1,47 @@
+Say you have these dependencies:
+
+![fetchers](fetchers.png)
+
+i.e. you must fetch the `f2` and `f3` data before fetching the `f1` data. However `f2` and `f3` can be fetched in parallel.
+
+`fetch-optimizer` take care of your fetchers running them
+in parallel when possible.
+
 ```js
-// queries.js
+// fetchers.js
 
 import { Poset, optimize } from 'fetch-optimizer';
 
-const queries = {
-  q1: () => new Promise(resolve => setTimeout(resolve('q1'), 200)),
-  q2: () => new Promise(resolve => setTimeout(resolve('q2'), 50)),
-  q2: () => new Promise(resolve => setTimeout(resolve('q3'), 150))
+// define the fetchers. A fetcher must have the following signature:
+// () => Promise
+const fetchers = {
+  f1: () => new Promise(resolve => setTimeout(resolve('f1'), 200)),
+  f2: () => new Promise(resolve => setTimeout(resolve('f2'), 50)),
+  f2: () => new Promise(resolve => setTimeout(resolve('f3'), 150))
 };
 
+// define the dependencies between the fetchers
 const dependencies = new Poset()
-  .addEdge('q1', 'q2')
-  .addEdge('q1', 'q3');
+  .addEdge('f1', 'f2')  // f1 requires f2
+  .addEdge('f1', 'f3'); // f1 requires also f3
 
-optimize(dependencies, queries);
+optimize(dependencies, fetchers).then(() => {
+    // tasks completed...
+});
 ```
 
-Run
+Run:
 
 ```sh
-DEBUG=fetch-optimizer node queries.js
+DEBUG=fetch-optimizer node fetchers.js
 ```
 
 Console output:
 
 ```sh
-fetch-optimizer the following tasks will run in parallel: ["q2","q3"] with input: null +0ms
-fetch-optimizer task `q2` returns: "q2" +53ms
-fetch-optimizer task `q3` returns: "q3" +100ms
-fetch-optimizer the following tasks will run in parallel: ["q1"] with input: ["q2","q3"] +0ms
-fetch-optimizer task `q1` returns: "q1" +202ms
+fetch-optimizer the following fetchers will run in parallel: ["f2","f3"] with input: null +0ms
+fetch-optimizer fetcher `f2` returns: "f2" +53ms
+fetch-optimizer fetcher `f3` returns: "f3" +100ms
+fetch-optimizer the following fetchers will run in parallel: ["f1"] with input: ["f2","f3"] +0ms
+fetch-optimizer fetcher `f1` returns: "f1" +202ms
 ```

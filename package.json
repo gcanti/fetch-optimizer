@@ -4,7 +4,7 @@
   "description": "Optimizes dependent data fetchers",
   "main": "index.js",
   "scripts": {
-    "build": "node_modules/.bin/babel src -d lib --stage=0 --loose -w",
+    "build": "node_modules/.bin/babel src -d lib --stage=0 -L -w",
     "test": "DEBUG=fetch-optimizer mocha"
   },
   "repository": {

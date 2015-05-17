@@ -1,18 +1,27 @@
 import debug from 'debug';
 
-const log = debug('fetch-optimizer');
+const SOURCE = 'fetch-optimizer';
+const log = debug(SOURCE);
 
-export function optimize(poset, nodes) {
-  const chain = poset.getSubPoset(nodes).toChain();
+export function optimize(dependencies: Poset, fetchers: Object) {
+  const upset = dependencies.getUpsetPoset(fetchers);
+  if (process.env.NODE_ENV !== 'production') {
+    for (let fetcher in upset.nodes) {
+      if (!fetchers.hasOwnProperty(fetcher)) {
+        throw new Error(`${SOURCE} cannot optimize: fetcher "${fetcher}" is missing`);
+      }
+    }
+  }
+  const chain = upset.toChain();
   const init = Promise.resolve(null);
   return chain.reduce((promise, rank) => {
     const names = Object.keys(rank);
     return promise.then(res => {
-      log('the following tasks will run in parallel: %j with input: %j', names, res);
+      log('the following fetchers will run in parallel: %j with input: %j', names, res);
       const promises = names.map(name => {
-        const promise = nodes[name](res);
+        const promise = fetchers[name](res);
         return promise.then(res => {
-          log('task `%s` returns: %j', name, res);
+          log('fetcher `%s` returns: %j', name, res);
           return res;
         });
       });
@@ -60,7 +69,7 @@ export class Poset {
     if (this.nodes.hasOwnProperty(node)) {
       return this.nodes[node];
     } else if (process.env.NODE_ENV !== 'production') {
-      console.warn('[fetch-optimizer] unknown node %s', node);
+      throw new Error(`${SOURCE} unknown node ${node}`);
     }
   }
 
@@ -101,27 +110,22 @@ export class Poset {
     return ret;
   }
 
-  getSubPoset(nodes) {
+  getUpsetPoset(nodes) {
     const ret = {};
-    var getEdges = node => {
-      const ret = {};
-      const edges = this.getEdges(node);
-      for (let to in edges) {
-        if (nodes.hasOwnProperty(to)) {
-          ret[to] = edges[to];
-        } else {
-          merge(ret, getEdges(to));
+    const addNodes = nodes => {
+      for (let node in nodes) {
+        if (this.nodes.hasOwnProperty(node)) {
+          if (!ret.hasOwnProperty(node)) {
+            const edges = this.getEdges(node);
+            ret[node] = edges;
+            addNodes(edges);
+          }
+        } else if (process.env.NODE_ENV !== 'production') {
+          throw new Error(`${SOURCE} unknown node ${node}`);
         }
       }
-      return ret;
     };
-    for (let node in nodes) {
-      if (this.nodes.hasOwnProperty(node)) {
-        ret[node] = getEdges(node);
-      } else if (process.env.NODE_ENV !== 'production') {
-        console.warn('[fetch-optimizer] unknown node %s', node);
-      }
-    }
+    addNodes(nodes);
     return new Poset(ret);
   }
 
