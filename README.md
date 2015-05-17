@@ -13,7 +13,7 @@ const dependencies = new Poset()
   .addEdge('q1', 'q2')
   .addEdge('q1', 'q3');
 
-optimize(dependencies, queries).then(res => console.log('end'));
+optimize(dependencies, queries);
 ```
 
 Run
@@ -30,5 +30,4 @@ fetch-optimizer task `q2` returns: "q2" +53ms
 fetch-optimizer task `q3` returns: "q3" +100ms
 fetch-optimizer the following tasks will run in parallel: ["q1"] with input: ["q2","q3"] +0ms
 fetch-optimizer task `q1` returns: "q1" +202ms
-end
 ```

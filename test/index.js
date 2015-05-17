@@ -68,6 +68,11 @@ describe('Poset', function () {
   });
 
   it('getSubPoset', function () {
+
+    var poset = new Poset();
+    var subPoset = poset.getSubPoset({a: 1, c: 1});
+    assert.deepEqual(subPoset.nodes, {});
+
     var poset = new Poset()
       .addEdge('a', 'b')
       .addEdge('b', 'c');

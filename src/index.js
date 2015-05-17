@@ -57,7 +57,11 @@ export class Poset {
   }
 
   getEdges(node) {
-    return this.nodes[node];
+    if (this.nodes.hasOwnProperty(node)) {
+      return this.nodes[node];
+    } else if (process.env.NODE_ENV !== 'production') {
+      console.warn('[fetch-optimizer] unknown node %s', node);
+    }
   }
 
   hasEdges(node) {
@@ -112,7 +116,11 @@ export class Poset {
       return ret;
     };
     for (let node in nodes) {
-      ret[node] = getEdges(node);
+      if (this.nodes.hasOwnProperty(node)) {
+        ret[node] = getEdges(node);
+      } else if (process.env.NODE_ENV !== 'production') {
+        console.warn('[fetch-optimizer] unknown node %s', node);
+      }
     }
     return new Poset(ret);
   }
