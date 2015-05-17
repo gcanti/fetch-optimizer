@@ -140,3 +140,29 @@ describe('optimize', function () {
   });
 
 });
+
+describe('toDot', function () {
+
+  it('should return a dot file', function () {
+    var toDot = require('../lib/dot').toDot;
+    var poset = new Poset()
+      .addEdge('f1', 'f2')
+      .addEdge('f1', 'f3');
+    var dot = toDot(poset);
+    assert.strictEqual(dot, 'digraph poset {\nf1 [label=f1];\nf2 [label=f2];\nf3 [label=f3];\nf2 -> f1;\nf3 -> f1;\n}');
+  });
+
+});
+
+describe('toSrc', function () {
+
+  it('should return a google map image', function () {
+    var toSrc = require('../lib/dot').toSrc;
+    var poset = new Poset()
+      .addEdge('f1', 'f2')
+      .addEdge('f1', 'f3');
+    var src = toSrc(poset);
+    assert.strictEqual(src, 'https://chart.googleapis.com/chart?cht=gv%3Adot&chl=digraph%20poset%20%7B%0Af1%20%5Blabel%3Df1%5D%3B%0Af2%20%5Blabel%3Df2%5D%3B%0Af3%20%5Blabel%3Df3%5D%3B%0Af2%20-%3E%20f1%3B%0Af3%20-%3E%20f1%3B%0A%7D');
+  });
+
+});
