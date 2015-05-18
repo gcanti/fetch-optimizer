@@ -7,7 +7,7 @@ export const options = {
   Promise: Promise
 };
 
-export function optimize(dependencies: Poset, fetchers: Object) {
+export function optimize(dependencies: Poset, fetchers: Object, initPromise) {
   const upset = dependencies.getUpsetPoset(fetchers);
   if (process.env.NODE_ENV !== 'production') {
     for (let fetcher in upset.nodes) {
@@ -17,7 +17,7 @@ export function optimize(dependencies: Poset, fetchers: Object) {
     }
   }
   const chain = upset.toChain();
-  const init = options.Promise.resolve(null);
+  initPromise = initPromise || options.Promise.resolve(null);
   return chain.reduce((promise, rank) => {
     const names = Object.keys(rank);
     return promise.then(res => {
@@ -31,7 +31,7 @@ export function optimize(dependencies: Poset, fetchers: Object) {
       });
       return options.Promise.all(promises);
     });
-  }, init);
+  }, initPromise);
 }
 
 function isEmpty(hash) {
