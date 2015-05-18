@@ -3,6 +3,10 @@ import debug from 'debug';
 const SOURCE = 'fetch-optimizer';
 const log = debug(SOURCE);
 
+export const options = {
+  Promise: Promise
+};
+
 export function optimize(dependencies: Poset, fetchers: Object) {
   const upset = dependencies.getUpsetPoset(fetchers);
   if (process.env.NODE_ENV !== 'production') {
@@ -13,7 +17,7 @@ export function optimize(dependencies: Poset, fetchers: Object) {
     }
   }
   const chain = upset.toChain();
-  const init = Promise.resolve(null);
+  const init = options.Promise.resolve(null);
   return chain.reduce((promise, rank) => {
     const names = Object.keys(rank);
     return promise.then(res => {
@@ -25,7 +29,7 @@ export function optimize(dependencies: Poset, fetchers: Object) {
           return res;
         });
       });
-      return Promise.all(promises);
+      return options.Promise.all(promises);
     });
   }, init);
 }
