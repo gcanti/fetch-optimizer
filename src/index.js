@@ -21,11 +21,11 @@ export function optimize(dependencies: Poset, fetchers: Object, initPromise) {
   return chain.reduce((promise, rank) => {
     const names = Object.keys(rank);
     return promise.then(res => {
-      log('the following fetchers will run in parallel: %j with input: %j', names, res);
+      log('parallel fetchers: %j with input: %j', names, res);
       const promises = names.map(name => {
         const promise = fetchers[name](res);
         return promise.then(res => {
-          log('fetcher `%s` returns: %j', name, res);
+          //log('fetcher `%s` returns: %j', name, res);
           return res;
         });
       });
@@ -60,6 +60,11 @@ export class Poset {
 
   addNode(node) {
     this.nodes[node] = this.nodes[node] || {};
+    return this;
+  }
+
+  addNodes(...nodes) {
+    nodes.forEach(node => this.addNode(node));
     return this;
   }
 
