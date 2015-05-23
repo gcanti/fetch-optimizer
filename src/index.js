@@ -58,19 +58,17 @@ export class Poset {
     return isEmpty(this.nodes);
   }
 
-  addNode(node) {
-    this.nodes[node] = this.nodes[node] || {};
-    return this;
-  }
-
-  addNodes(...nodes) {
-    nodes.forEach(node => this.addNode(node));
+  addNode(...nodes) {
+    nodes.forEach(node => this.nodes[node] = this.nodes[node] || {});
     return this;
   }
 
   addEdge(from, to) {
-    this.addNode(from).addNode(to);
-    this.nodes[from][to] = 1;
+    this.addNode(to);
+    [].concat(from).forEach(node => {
+      this.addNode(node);
+      this.nodes[node][to] = 1;
+    });
     return this;
   }
 
