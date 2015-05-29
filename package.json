@@ -1,6 +1,6 @@
 {
   "name": "fetch-optimizer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Optimizes dependent data fetchers",
   "main": "index.js",
   "scripts": {

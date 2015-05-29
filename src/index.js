@@ -1,3 +1,5 @@
+/* @flow */
+
 import debug from 'debug';
 
 const SOURCE = 'fetch-optimizer';
@@ -7,7 +9,7 @@ export const options = {
   Promise: Promise
 };
 
-export function optimize(dependencies: Poset, fetchers: Object, initPromise) {
+export function optimize(dependencies: Poset, fetchers: Object, initPromise: Promise) {
   const upset = dependencies.getUpsetPoset(fetchers);
   if (process.env.NODE_ENV !== 'production') {
     for (let fetcher in upset.nodes) {
@@ -58,17 +60,14 @@ export class Poset {
     return isEmpty(this.nodes);
   }
 
-  addNode(...nodes) {
-    nodes.forEach(node => this.nodes[node] = this.nodes[node] || {});
+  addNode(node) {
+    this.nodes[node] = this.nodes[node] || {}
     return this;
   }
 
   addEdge(from, to) {
-    this.addNode(to);
-    [].concat(from).forEach(node => {
-      this.addNode(node);
-      this.nodes[node][to] = 1;
-    });
+    this.addNode(from).addNode(to);
+    this.nodes[from][to] = 1;
     return this;
   }
 
