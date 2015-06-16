@@ -4,7 +4,7 @@ Say you have these dependencies:
 
 i.e. you must fetch the `f2` and `f3` data before fetching the `f1` data. However `f2` and `f3` can be fetched in parallel.
 
-`fetch-optimizer` take care of your fetchers running them
+`fetch-optimizer` takes care of your fetchers running them
 in parallel when possible.
 
 ```js
